@@ -42,7 +42,20 @@ Chat::Chat (const QString & host, quint16 port, QObject * parent) :
       // Recherche de la commande serveur dans le tableau associatif.
       // - si elle existe, traitement du reste du message par le processeur ;
       // - sinon, émission du signal "message" contenant la ligne entière.
-      // TODO
+      int firstSpaceIndex = command.indexOf(' ');
+      QString mot = QStringRef(&m, 0, firstSpaceIndex).toString();
+      bool trouve = PROCESSORS.count(mot) > 0;
+      if(trouve)
+      {
+        QString message = QStringRef(&m, firstSpaceIndex, command.length() - firstSpaceIndex).toString();
+        Chat::Processor proc = PROCESSORS.at(mot);
+        (this->*proc)(stream);
+      }
+      else
+      {
+        this->write(command);
+      }
+
     }
   });
 

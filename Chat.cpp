@@ -65,7 +65,7 @@ Chat::Chat (const QString & host, quint16 port, QObject * parent) :
 
 Chat::~Chat ()
 {
-  // Déconnexion des signaux.
+  // Déconnexion des signaux .
   socket.disconnect ();
 }
 
@@ -115,7 +115,7 @@ ChatWindow::ChatWindow (const QString & host, quint16 port, QWidget * parent) :
   setCentralWidget (&text);
 
   // Insertion de la zone de saisie.
-  // QDockWidget insérable en haut ou en bas, inséré en bas.
+  // QDockWidget insérable en haut ou en bas, inséré en bas .
   // TODO
 
   // Désactivation de la zone de saisie.

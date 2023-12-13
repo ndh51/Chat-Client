@@ -2,6 +2,7 @@
 #include "Chat.h"
 
 #include <iostream>
+#include <QDockWidget>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Chat ////////////////////////////////////////////////////////////////////////
@@ -169,7 +170,11 @@ ChatWindow::ChatWindow (const QString & host, quint16 port, QWidget * parent) :
   // TODO
 
   // Désactivation de la zone de saisie.
-  input.setEnabled (false);
+
+  this->input.setEnabled (false);
+  this->participants.setEnabled(false);
+
+
 
   // Envoi de messages lorsque la touche "entrée" est pressée.
   // - transmission du texte au moteur de messagerie instantanée ;
@@ -194,6 +199,11 @@ ChatWindow::ChatWindow (const QString & host, quint16 port, QWidget * parent) :
   });
 
   // Liste des utilisateurs.
+  QDockWidget* dockParticpantsWidget = new QDockWidget("Liste des utilisateurs", nullptr, Qt::FramelessWindowHint | Qt::WindowSystemMenuHint);
+  dockParticpantsWidget->setWidget(&participants);
+  dockParticpantsWidget->setFeatures(QDockWidget::NoDockWidgetFeatures);
+  this->addDockWidget(Qt::RightDockWidgetArea, dockParticpantsWidget);
+  this->participants.setModel(&model_participants);
   // Connexion d'un utilisateur.
   // Déconnexion d'un utilisateur.
   // Nouvel alias d'un utilisateur.

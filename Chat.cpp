@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <QDockWidget>
+#include <QVBoxLayout>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Chat ////////////////////////////////////////////////////////////////////////
@@ -204,6 +205,34 @@ ChatWindow::ChatWindow (const QString & host, quint16 port, QWidget * parent) :
   dockParticpantsWidget->setFeatures(QDockWidget::NoDockWidgetFeatures);
   this->addDockWidget(Qt::RightDockWidgetArea, dockParticpantsWidget);
   this->participants.setModel(&model_participants);
+
+  connect(&participants, &QListView::doubleClicked, [this] (const QModelIndex& index) {
+          QString recipent = this->model_participants.data(index).toString();
+          QDockWidget* dockWidget = new QDockWidget("Conversation avec " + recipent, nullptr, Qt::FramelessWindowHint | Qt::WindowSystemMenuHint);
+          dockWidget->setFeatures(QDockWidget::DockWidgetClosable|QDockWidget::DockWidgetMovable);
+
+          QWidget* inside = new QWidget (dockWidget);
+          dockWidget->setWidget(inside);
+
+          QVBoxLayout* layout = new QVBoxLayout (inside);
+          inside->setLayout(layout);
+
+          QTextEdit* textEdit = new QTextEdit ();
+          layout->addWidget(textEdit, true);
+          textEdit->setReadOnly (true);
+
+          QLineEdit* lineEdit = new QLineEdit ();
+          layout->addWidget(lineEdit, true);
+
+          connect(lineEdit, &QLineEdit::returnPressed, [this, lineEdit, recipent] () {
+              this->chat.write("/private " + recipent + " " + lineEdit->text());
+              lineEdit->clear();
+          });
+
+          dockWidget->show();
+      });
+
+
   // Connexion d'un utilisateur.
   // Déconnexion d'un utilisateur.
   // Nouvel alias d'un utilisateur.
@@ -217,5 +246,5 @@ ChatWindow::ChatWindow (const QString & host, quint16 port, QWidget * parent) :
 
   // CONNEXION !
   text.append (tr("<b>Connecting...</b>"));
-}
 
+}

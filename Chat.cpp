@@ -143,6 +143,7 @@ void Chat::process_error (QTextStream & is)
   emit error (id);
 }
 
+
 // Envoi d'un message à travers le socket.
 void Chat::write (const QString & message)
 {
@@ -168,7 +169,11 @@ ChatWindow::ChatWindow (const QString & host, quint16 port, QWidget * parent) :
 
   // Insertion de la zone de saisie.
   // QDockWidget insérable en haut ou en bas, inséré en bas .
-  // TODO
+  QDockWidget* dockInputWidget = new QDockWidget("Zone de saisie", nullptr, Qt::FramelessWindowHint | Qt::WindowSystemMenuHint);
+  dockInputWidget->setWidget(&input);
+  dockInputWidget->setFeatures(QDockWidget::NoDockWidgetFeatures);
+  this->addDockWidget(Qt::BottomDockWidgetArea, dockInputWidget);
+
 
   // Désactivation de la zone de saisie.
 

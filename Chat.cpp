@@ -4,6 +4,7 @@
 #include <iostream>
 #include <QDockWidget>
 #include <QVBoxLayout>
+#include <QInputDialog>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Chat ////////////////////////////////////////////////////////////////////////
@@ -196,12 +197,33 @@ ChatWindow::ChatWindow (const QString & host, quint16 port, QWidget * parent) :
   // - saisie de l'alias ;
   // - envoi de l'alias ;
   // - activation de la zone de saisie.
-  // TODO
+  connect(&chat, &Chat::connected, [this] () {
+      this->text.append("Connected!");
+      this->text.append("Type your username");
+      bool ok;
+      QString alias = QInputDialog::getText(this, "Connection", "Alias: ", QLineEdit::Normal, "", &ok);
+
+      if(ok && !alias.isEmpty() && !alias.contains(" "))
+      {
+          this->chat.write(alias);
+          input.setEnabled(true);
+          this->participants.setEnabled(true);
+      }
+  });
+
 
   // Déconnexion.
   // - désactivation de la zone de saisie.
   // - affichage d'un message pour signaler la déconnexion.
-  // TODO
+  connect(&chat, &Chat::disconnected, [this] () {
+      this->text.append("Disconnected!");
+      this->input.setEnabled(false);
+      this->participants.setEnabled(false);
+      this->model_participants.setStringList(QStringList());
+      this->model_participants.dataChanged(model_participants.index(0),
+                                     model_participants.index(model_participants.rowCount()));
+  });
+
 
   // Messages.
   connect (&chat, &Chat::message, [this] (const QString & message) {

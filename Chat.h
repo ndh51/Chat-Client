@@ -60,6 +60,18 @@ class Chat : public QObject
     void private_msg(const QString & sender, const QString & message);
 };
 
+class PrivateChat : public QWidget
+{
+    Q_OBJECT
+
+public:
+    QTextEdit textEdit;
+    QLineEdit lineEdit;
+
+    explicit PrivateChat(QWidget *parent = nullptr);
+    void message(const QString& message);
+};
+
 // ChatWindow hérite de QMainWindow.
 class ChatWindow : public QMainWindow
 {
@@ -78,11 +90,19 @@ class ChatWindow : public QMainWindow
     // Model de la liste des participants
     QStringListModel model_participants;
 
+    QTabWidget tabWidget;
+
+    QMap<QString, PrivateChat*> privateChats;
+
+
 
   public:
     // Constructeur.
     ChatWindow (const QString & host, quint16 port, QWidget * parent = nullptr);
 };
+
+
+
 
 #endif // CHAT_H
 

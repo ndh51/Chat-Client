@@ -185,7 +185,11 @@ ChatWindow::ChatWindow (const QString & host, quint16 port, QWidget * parent) :
   // Envoi de messages lorsque la touche "entrée" est pressée.
   // - transmission du texte au moteur de messagerie instantanée ;
   // - effacement de la zone de saisie.
-  // TODO
+  connect(&input, &QLineEdit::returnPressed, [this] () {
+       this->chat.write(input.text());
+       this->input.clear();
+   });
+
 
   // Connexion.
   // - affichage d'un message confirmant la connexion ;

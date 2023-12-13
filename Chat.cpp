@@ -9,7 +9,14 @@
 
 // Processeurs.
 const std::map<QString, Chat::Processor> Chat::PROCESSORS {
-  {"#error", &Chat::process_error}
+  {"#error", &Chat::process_error},
+  {"#alias", &Chat::process_alias},
+  {"#connected", &Chat::process_connected},
+  {"#disconnected", &Chat::process_disconnected},
+  {"#rename", &Chat::process_renamed},
+  {"#renamed", &Chat::process_renamed},
+  {"#list", &Chat::process_list},
+  {"#private", &Chat::process_private}
 };
 
 // Constructeur.
@@ -18,7 +25,9 @@ Chat::Chat (const QString & host, quint16 port, QObject * parent) :
   socket ()
 {
   // Signal "connected" émis lorsque la connexion est effectuée.
-   connect(&socket, &QTcpSocket::connected, this, &Chat::connected);
+    connect(&socket, &QTcpSocket::connected, [this, host, port](){
+        emit connected (host, port);
+    });
 
 
   // Signal "disconnected" émis lors d'une déconnexion du socket.
@@ -146,10 +155,14 @@ ChatWindow::ChatWindow (const QString & host, quint16 port, QWidget * parent) :
   QMainWindow (parent),
   chat (host, port, this),
   text (this),
-  input (this)
+  input (this),
+  participants (this)
 {
   text.setReadOnly (true);
   setCentralWidget (&text);
+
+  this->participants.setEditTriggers(QAbstractItemView::NoEditTriggers);
+
 
   // Insertion de la zone de saisie.
   // QDockWidget insérable en haut ou en bas, inséré en bas .

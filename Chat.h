@@ -5,6 +5,8 @@
 #include <QTcpSocket>
 #include <QTextEdit>
 #include <QLineEdit>
+#include <QListView>
+#include <QStringListModel>
 
 // Chat hérite de QObject
 class Chat : public QObject
@@ -70,6 +72,12 @@ class ChatWindow : public QMainWindow
     QTextEdit text;
     // Zone de saisie.
     QLineEdit input;
+
+    // Zone des participants
+    QListView participants;
+    // Model de la liste des participants
+    QStringListModel model_participants;
+
 
   public:
     // Constructeur.

@@ -26,6 +26,13 @@ class Chat : public QObject
     // Gestion des erreurs.
     void process_error (QTextStream &);
 
+    void process_alias (QTextStream &);
+    void process_connected (QTextStream &);
+    void process_disconnected (QTextStream &);
+    void process_renamed (QTextStream &);
+    void process_list (QTextStream &);
+    void process_private (QTextStream &);
+
   public:
     // constructeur : nom du serveur, port et, éventuellement, objet parent.
     Chat (const QString & host, quint16 port, QObject * parent = nullptr);
@@ -42,6 +49,13 @@ class Chat : public QObject
     void message (const QString & message);
     // Error.
     void error (const QString & id);
+
+    void usr_alias (const QString & id);
+    void usr_list (const QStringList & users);
+    void usr_connected (const QString & id);
+    void usr_disconnected (const QString & id);
+    void usr_rename (const QString & oldUsername, const QString & newUsername);
+    void private_msg(const QString & sender, const QString & message);
 };
 
 // ChatWindow hérite de QMainWindow.

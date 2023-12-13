@@ -70,22 +70,59 @@ Chat::~Chat ()
 }
 
 // Commande "#alias"
-// TODO
+void Chat::process_alias (QTextStream & is)
+{
+    QString id;
+    is >> id;
+    emit usr_alias(id);
+}
 
 // Commande "#connected"
-// TODO
+void Chat::process_connected (QTextStream & is)
+{
+    QString id;
+    is >> id >> ws;
+    emit usr_connected(id);
+}
+
 
 // Commande "#disconnected"
-// TODO
+void Chat::process_disconnected (QTextStream & is)
+{
+    QString id;
+    is >> id >> ws;
+    emit usr_disconnected(id);
+}
+
 
 // Commande "#renamed"
-// TODO
+void Chat::process_renamed (QTextStream & is)
+{
+    QString oldUsername, newUsername;
+    is >> oldUsername >> ws >> newUsername;
+    emit usr_rename(oldUsername, newUsername);
+}
+
 
 // Commande "#list"
-// TODO
+void Chat::process_list (QTextStream & is)
+{
+    is >> ws;
+    QString line = is.readAll();
+    QStringList list = line.split(' ');
+    list.sort();
+    emit usr_list(list);
+}
+
 
 // Commande "#private"
-// TODO
+void Chat::process_private (QTextStream & is)
+{
+    QString id, message;
+    is >> ws >> id >> ws;
+    emit private_msg (id, is.readAll());
+}
+
 
 // Commande "#error"
 void Chat::process_error (QTextStream & is)

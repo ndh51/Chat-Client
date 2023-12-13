@@ -198,10 +198,10 @@ ChatWindow::ChatWindow (const QString & host, quint16 port, QWidget * parent) :
   // - envoi de l'alias ;
   // - activation de la zone de saisie.
   connect(&chat, &Chat::connected, [this] () {
-      this->text.append("Connected!");
-      this->text.append("Type your username");
+      this->text.append("Connecté !");
+      this->text.append("Tapez votre Pseudonyme");
       bool ok;
-      QString alias = QInputDialog::getText(this, "Connection", "Alias: ", QLineEdit::Normal, "", &ok);
+      QString alias = QInputDialog::getText(this, "Connection", "Pseudonyme : ", QLineEdit::Normal, "", &ok);
 
       if(ok && !alias.isEmpty() && !alias.contains(" "))
       {
@@ -268,7 +268,47 @@ ChatWindow::ChatWindow (const QString & host, quint16 port, QWidget * parent) :
   // Déconnexion d'un utilisateur.
   // Nouvel alias d'un utilisateur.
   // Message privé.
-  // TODO
+  connect(&chat, &Chat::usr_connected, [this] (const QString & username) {
+     this->text.append("#connected " + username);
+     QStringList list = model_participants.stringList ();
+     list.append(username);
+     list.sort();
+     this->model_participants.setStringList (list);
+     this->model_participants.dataChanged(model_participants.index(0),
+                                    model_participants.index(model_participants.rowCount()));
+  });
+
+  connect(&chat, &Chat::usr_disconnected, [this] (const QString & username) {
+     this->text.append("#disconnected " + username);
+     QStringList list = model_participants.stringList ();
+     list.removeOne(username);
+     this->model_participants.setStringList (list);
+     this->model_participants.dataChanged(model_participants.index(0), model_participants.index(model_participants.rowCount()));
+  });
+
+  connect(&chat, &Chat::usr_list, [this] (const QStringList & users) {
+     this->text.append("#list " + users.join(" "));
+     this->model_participants.setStringList (users);
+     this->model_participants.dataChanged(model_participants.index(0), model_participants.index(model_participants.rowCount()));
+  });
+
+  connect(&chat, &Chat::usr_rename, [this] (const QString & oldUsername, const QString & newUsername) {
+     this->text.append("#rename " + oldUsername + " " + newUsername);
+      QStringList list = this->model_participants.stringList();
+      list.replace(list.indexOf(oldUsername), newUsername);
+      this->model_participants.setStringList (list);
+      this->model_participants.dataChanged(model_participants.index(0), model_participants.index(model_participants.rowCount()));
+  });
+
+  connect(&chat, &Chat::private_msg, [this] (const QString & sender, const QString & message) {
+     this->text.append("#private " + sender + " " + message);
+
+  });
+
+  connect(&chat, &Chat::usr_alias, [this] (const QString & username) {
+     this->text.append("#alias " + username);
+  });
+
 
   // Gestion des erreurs.
   connect (&chat, &Chat::error, [this] (const QString & id) {
@@ -276,6 +316,6 @@ ChatWindow::ChatWindow (const QString & host, quint16 port, QWidget * parent) :
   });
 
   // CONNEXION !
-  text.append (tr("<b>Connecting...</b>"));
+  text.append (tr("<b>Connexion...</b>"));
 
 }

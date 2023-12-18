@@ -158,6 +158,45 @@ void Chat::write (const QString & message)
 // ChatWindow //////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+
+
+PrivateChat* ChatWindow::createOrShowWindow(const QString& recipent)
+{
+    if(alias == recipent)
+        return nullptr;
+
+    auto search = privateChats.find(recipent);
+    if(search != privateChats.end())
+    {
+        if(!search.value()->isVisible())
+            tabWidget.addTab(search.value(), search.key());
+
+        int index = tabWidget.indexOf(search.value());
+        tabWidget.setCurrentIndex(index);
+        tabWidget.setTabEnabled(index, true);
+        tabWidget.show();
+        return search.value();
+    }
+    else
+    {
+        PrivateChat* privChat = new PrivateChat() ;
+        this->privateChats.insert(recipent, privChat);
+        tabWidget.addTab(privChat, recipent);
+
+        connect(&privChat->lineEdit, &QLineEdit::returnPressed, [this, privChat, recipent] ()
+        {
+            QString message = privChat->lineEdit.text();
+            privChat->message(message);
+            this->chat.write("/private " + recipent + " " + message);
+            privChat->lineEdit.clear();
+        });
+
+        tabWidget.show();
+        return privChat;
+    }
+}
+
+
 ChatWindow::ChatWindow (const QString & host, quint16 port, QWidget * parent) :
   QMainWindow (parent),
   chat (host, port, this),
@@ -167,6 +206,12 @@ ChatWindow::ChatWindow (const QString & host, quint16 port, QWidget * parent) :
 {
   text.setReadOnly (true);
   setCentralWidget (&text);
+
+
+  connect(&tabWidget, &QTabWidget::tabCloseRequested, [this] (int index) {
+      tabWidget.removeTab(index);
+  });
+
 
   this->participants.setEditTriggers(QAbstractItemView::NoEditTriggers);
 
@@ -184,6 +229,10 @@ ChatWindow::ChatWindow (const QString & host, quint16 port, QWidget * parent) :
   this->input.setEnabled (false);
   this->participants.setEnabled(false);
 
+  connect(&participants, &QListView::doubleClicked, [this] (const QModelIndex& index) {
+      QString recipent = this->model_participants.data(index).toString();
+      createOrShowWindow(recipent);
+});
 
 
   // Envoi de messages lorsque la touche "entrée" est pressée.
@@ -217,6 +266,8 @@ ChatWindow::ChatWindow (const QString & host, quint16 port, QWidget * parent) :
 
   // Déconnexion.
   // - désactivation de la zone de saisie.
+
+
   // - affichage d'un message pour signaler la déconnexion.
   connect(&chat, &Chat::disconnected, [this] () {
       this->text.append("Disconnected!");

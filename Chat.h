@@ -7,6 +7,9 @@
 #include <QLineEdit>
 #include <QListView>
 #include <QStringListModel>
+#include <QMimeData>
+#include <QFileInfo>
+#include <QImageReader>
 
 // Chat hérite de QObject
 class Chat : public QObject
@@ -80,7 +83,7 @@ class ChatWindow : public QMainWindow
   private:
     // Moteur de messagerie instantanée.
     Chat chat;
-    // Zone de texte.
+        QString alias;
     QTextEdit text;
     // Zone de saisie.
     QLineEdit input;
@@ -93,6 +96,8 @@ class ChatWindow : public QMainWindow
     QTabWidget tabWidget;
 
     QMap<QString, PrivateChat*> privateChats;
+
+    PrivateChat* createOrShowWindow(const QString& recipent);
 
 
 

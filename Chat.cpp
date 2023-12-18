@@ -1,10 +1,13 @@
 #include <QMessageBox>
 #include "Chat.h"
-
+#include <map>
 #include <iostream>
 #include <QDockWidget>
 #include <QVBoxLayout>
 #include <QInputDialog>
+
+using namespace std;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // Chat ////////////////////////////////////////////////////////////////////////
@@ -238,30 +241,29 @@ ChatWindow::ChatWindow (const QString & host, quint16 port, QWidget * parent) :
   this->participants.setModel(&model_participants);
 
   connect(&participants, &QListView::doubleClicked, [this] (const QModelIndex& index) {
-          QString recipent = this->model_participants.data(index).toString();
-          QDockWidget* dockWidget = new QDockWidget("Conversation avec " + recipent, nullptr, Qt::FramelessWindowHint | Qt::WindowSystemMenuHint);
-          dockWidget->setFeatures(QDockWidget::DockWidgetClosable|QDockWidget::DockWidgetMovable);
+      QString recipent = this->model_participants.data(index).toString();
+      auto search = privateChats.find(recipent);
+      if(search != privateChats.end())
+      {
+          tabWidget.setCurrentWidget(search.value());
+      }
+      else
+      {
+          PrivateChat* privChat = new PrivateChat() ;
+          this->privateChats.insert(recipent, privChat);
+          tabWidget.addTab(privChat, recipent);
 
-          QWidget* inside = new QWidget (dockWidget);
-          dockWidget->setWidget(inside);
-
-          QVBoxLayout* layout = new QVBoxLayout (inside);
-          inside->setLayout(layout);
-
-          QTextEdit* textEdit = new QTextEdit ();
-          layout->addWidget(textEdit, true);
-          textEdit->setReadOnly (true);
-
-          QLineEdit* lineEdit = new QLineEdit ();
-          layout->addWidget(lineEdit, true);
-
-          connect(lineEdit, &QLineEdit::returnPressed, [this, lineEdit, recipent] () {
-              this->chat.write("/private " + recipent + " " + lineEdit->text());
-              lineEdit->clear();
+          connect(&privChat->lineEdit, &QLineEdit::returnPressed, [this, privChat, recipent] ()
+          {
+              QString message = privChat->lineEdit.text();
+              privChat->message(message);
+              this->chat.write("/private " + recipent + " " + message);
+              privChat->lineEdit.clear();
           });
-
-          dockWidget->show();
+      }
+      tabWidget.show();
       });
+
 
 
   // Connexion d'un utilisateur.
@@ -318,4 +320,24 @@ ChatWindow::ChatWindow (const QString & host, quint16 port, QWidget * parent) :
   // CONNEXION !
   text.append (tr("<b>Connexion...</b>"));
 
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// PrivateChat //////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+PrivateChat::PrivateChat(QWidget *parent) : QWidget(parent), textEdit(), lineEdit()
+{
+    QVBoxLayout* layout = new QVBoxLayout;
+
+    layout->addWidget(&textEdit, true);
+    textEdit.setReadOnly (true);
+
+    layout->addWidget(&lineEdit, true);
+    setLayout(layout);
+}
+
+void PrivateChat::message(const QString& message)
+{
+    textEdit.append(message);
 }

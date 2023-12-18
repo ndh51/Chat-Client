@@ -30,7 +30,6 @@ class Chat : public QObject
     void process (const QString & message);
     // Gestion des erreurs.
     void process_error (QTextStream &);
-
     void process_alias (QTextStream &);
     void process_connected (QTextStream &);
     void process_disconnected (QTextStream &);
@@ -54,13 +53,13 @@ class Chat : public QObject
     void message (const QString & message);
     // Error.
     void error (const QString & id);
-
     void usr_alias (const QString & id);
     void usr_list (const QStringList & users);
     void usr_connected (const QString & id);
     void usr_disconnected (const QString & id);
     void usr_rename (const QString & oldUsername, const QString & newUsername);
     void private_msg(const QString & sender, const QString & message);
+    void receiveMessage (const QString & message);
 };
 
 class PrivateChat : public QWidget
@@ -83,7 +82,9 @@ class ChatWindow : public QMainWindow
   private:
     // Moteur de messagerie instantanée.
     Chat chat;
-        QString alias;
+
+    QString alias;
+
     QTextEdit text;
     // Zone de saisie.
     QLineEdit input;
@@ -91,6 +92,7 @@ class ChatWindow : public QMainWindow
     // Zone des participants
     QListView participants;
     // Model de la liste des participants
+
     QStringListModel model_participants;
 
     QTabWidget tabWidget;
@@ -98,8 +100,6 @@ class ChatWindow : public QMainWindow
     QMap<QString, PrivateChat*> privateChats;
 
     PrivateChat* createOrShowWindow(const QString& recipent);
-
-
 
   public:
     // Constructeur.

@@ -1,4 +1,4 @@
-# Chat Serveur
+# Chat Client
 
 ## à jumeler avec : https://github.com/ndh51/Chat-Server
 
